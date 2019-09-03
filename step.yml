@@ -13,9 +13,9 @@ summary: |
   Change your jira issue flow
 description: |
   Change your jira issue flow
-website: https://github.com/huascarbaptista/bitrise-step-jira-move-task-flow
-source_code_url: https://github.com/huascarbaptista/bitrise-step-jira-move-task-flow
-support_url: https://github.com/huascarbaptista/bitrise-step-jira-move-task-flow/issues
+website: https://github.com/HuascarBaptista/bitrise-step-jira-move-task-flow
+source_code_url: https://github.com/HuascarBaptista/bitrise-step-jira-move-task-flow
+support_url: https://github.com/HuascarBaptista/bitrise-step-jira-move-task-flow/issues
 host_os_tags:
   - osx-10.10
   - ubuntu-16.04
@@ -59,7 +59,7 @@ deps:
 
 toolkit:
   go:
-    package_name: github.com/HuascarBaptista/bitrise-step-jira-tickets
+    package_name: github.com/HuascarBaptista/bitrise-step-jira-move-task-flow
 inputs:
   - user_name:
     opts:
