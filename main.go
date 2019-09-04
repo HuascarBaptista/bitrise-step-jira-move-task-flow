@@ -38,8 +38,7 @@ func main() {
 	var assignees []jira.Assignee
 	for index := 0; index < len(issueKeys); index++ {
 		assigneeName := getCorrectValueOrEmpty(index, assigneesNames)
-		transitionId := getCorrectValueOrEmpty(index, transitionIds)
-		assignees = append(assignees, jira.Assignee{IssueKey: issueKeys[index], AssigneeName: assigneeName, TransitionId: transitionId})
+		assignees = append(assignees, jira.Assignee{IssueKey: issueKeys[index], AssigneeName: assigneeName, TransitionIds: transitionIds})
 	}
 
 	if err := client.ChangeStatusAndAssignee(assignees); err != nil {

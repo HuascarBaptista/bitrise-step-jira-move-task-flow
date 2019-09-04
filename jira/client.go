@@ -26,9 +26,9 @@ type Client struct {
 }
 
 type Assignee struct {
-	IssueKey     string
+	IssueKey      string
 	AssigneeName  string
-	TransitionId string
+	TransitionIds []string
 }
 
 type response struct {
@@ -107,44 +107,59 @@ type JsonTransition struct {
 	Id string `json:"id,omitempty"`
 }
 type TransitionRequest struct {
-	Assignee   JsonAssignee    `json:"assignee,omitempty"`
+	Assignee   JsonAssignee   `json:"assignee,omitempty"`
 	Transition JsonTransition `json:"transition,omitempty"`
 }
 
 func (client *Client) changeStatusAndAssignee(assignee Assignee, ch chan response) {
 	issueKey := assignee.IssueKey
 	assigneeName := assignee.AssigneeName
-	transitionId := assignee.TransitionId
+	transitionIds := assignee.TransitionIds
 
-	requestURL, err := urlutil.Join(client.baseURL, apiEndPoint, issueKey, transitionEndPoint)
-	if err != nil {
-		ch <- response{issueKey, err}
-		return
+	if len(transitionIds) == 0 {
+		ch <- response{issueKey, fmt.Errorf("no transition IDs has been added")}
 	}
-	newFields := &TransitionRequest{}
-	if assigneeName != "" {
-		newFields.Assignee = JsonAssignee{assigneeName}
+	var errorChangingTransition error = nil
+	for _, transitionId := range transitionIds {
+		requestURL, err := urlutil.Join(client.baseURL, apiEndPoint, issueKey, transitionEndPoint)
+		if err != nil {
+			ch <- response{issueKey, err}
+			return
+		}
+		newFields := &TransitionRequest{}
+		if assigneeName != "" {
+			newFields.Assignee = JsonAssignee{assigneeName}
+		}
+		if transitionId != "" {
+			newFields.Transition = JsonTransition{transitionId}
+		}
+		request, err := createRequest(http.MethodPost, requestURL, client.headers, newFields)
+		if err != nil {
+			ch <- response{issueKey, err}
+			return
+		}
+
+		requestBytes, err := httputil.DumpRequest(request, true)
+		if err != nil {
+			ch <- response{issueKey, err}
+			return
+		}
+		log.Debugf("Request: %v", string(requestBytes))
+
+		// Perform request
+		_, body, err := client.performRequest(request, nil)
+		log.Debugf("Body: %s", string(body))
+		if (err != nil) {
+			errorChangingTransition = err
+		} else {
+			ch <- response{issueKey, err}
+			break
+		}
 	}
-	if transitionId != "" {
-		newFields.Transition = JsonTransition{transitionId}
-	}
-	request, err := createRequest(http.MethodPost, requestURL, client.headers, newFields)
-	if err != nil {
-		ch <- response{issueKey, err}
-		return
+	if errorChangingTransition != nil {
+		ch <- response{issueKey, errorChangingTransition}
 	}
 
-	requestBytes, err := httputil.DumpRequest(request, true)
-	if err != nil {
-		ch <- response{issueKey, err}
-		return
-	}
-	log.Debugf("Request: %v", string(requestBytes))
-
-	// Perform request
-	_, body, err := client.performRequest(request, nil)
-	log.Debugf("Body: %s", string(body))
-	ch <- response{issueKey, err}
 }
 
 func createRequest(requestMethod string, url string, headers map[string]string, fields *TransitionRequest) (*http.Request, error) {
