@@ -152,8 +152,9 @@ func (client *Client) changeStatusAndAssignee(assignee Assignee, ch chan respons
 		if (err != nil) {
 			errorChangingTransition = err
 		} else {
+			errorChangingTransition = nil
 			ch <- response{issueKey, err}
-			break
+			return
 		}
 	}
 	if errorChangingTransition != nil {
