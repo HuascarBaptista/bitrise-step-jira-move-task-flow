@@ -15,7 +15,7 @@ type Config struct {
 	UserName     string `env:"user_name,required"`
 	APIToken     string `env:"api_token,required"`
 	BaseURL      string `env:"base_url,required"`
-	IssueKeys    string `env:"jira_tickets,required"`
+	IssueKeys    string `env:"jira_tickets"`
 	TransitionId string `env:"transition,required"`
 	AssigneeName string `env:"assigneeName"`
 }
@@ -25,7 +25,10 @@ func main() {
 	if err := stepconf.Parse(&cfg); err != nil {
 		failf("Issue with input: %s", err)
 	}
-
+	if len(cfg.IssueKeys) == 0 {
+		log.Infof("NO TICKETS:")
+		os.Exit(0)
+	}
 	stepconf.Print(cfg)
 	fmt.Println()
 
@@ -51,7 +54,7 @@ func getCorrectValueOrEmpty(i int, values []string) string {
 	if length > i {
 		return values[i]
 	} else {
-		if (length > 0) {
+		if length > 0 {
 			return values[length-1]
 		} else {
 			return ""

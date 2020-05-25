@@ -83,7 +83,6 @@ inputs:
     opts:
       title: Jira tickets keys
       summary: Jira tickets keys separated with `|`
-      is_required: true
 
   - transition:
     opts:
